@@ -1,0 +1,176 @@
+<script src="fig.js"></script>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Figures de style</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        #quiz-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question {
+            margin-bottom: 20px;
+        }
+        
+        .reponse {
+            margin-bottom: 10px;
+        }
+        
+        .reponse.correcte {
+            color: green;
+        }
+        
+        .reponse.incorrecte {
+            color: red;
+        }
+        
+        #figure-select {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Figures de style</h1>
+    <div id="quiz-container">
+        <select id="figure-select">
+            <option value="">Sélectionnez une figure de style</option>
+        </select>
+        <button id="start-button">Démarrer</button>
+        <div id="question-container"></div>
+        <button id="submit-button" style="display: none;">Soumettre</button>
+    </div>
+
+    <script>
+        // Importation des données
+        const data = window.data;
+
+        // Sélection des éléments du quiz
+        const figureSelect = document.getElementById('figure-select');
+        const startButton = document.getElementById('start-button');
+        const questionContainer = document.getElementById('question-container');
+        const submitButton = document.getElementById('submit-button');
+
+        // Variable pour stocker la question actuelle
+        let currentQuestion = 0;
+
+        // Fonction pour générer une question
+        function genererQuestion(figure) {
+            const question = document.createElement('div');
+            question.classList.add('question');
+            question.innerHTML = `<h2>${figure.name}</h2>
+                                  <p>Quelle est la définition de cette figure de style ?</p>`;
+
+            // Génération des réponses
+            const reponses = [];
+            for (let i = 0; i < 4; i++) {
+                const reponse = document.createElement('div');
+                reponse.classList.add('reponse');
+                reponse.innerHTML = `${i + 1}. ${getReponse(figure, i)}`;
+                reponses.push(reponse);
+            }
+
+            // Ajout des réponses correctes et incorrectes
+            const idx = Math.floor(Math.random() * reponses.length)
+            const reponseCorrecte = reponses[idx];
+            reponseCorrecte.classList.add('correcte');
+            reponseCorrecte.innerHTML = `${idx+1}. ${figure.def}`;
+
+            reponses.forEach((reponse) => {
+                if (reponse !== reponseCorrecte) {
+                    reponse.classList.add('incorrecte');
+                }
+            });
+
+            // Ajout des réponses à la question
+            question.appendChild(document.createElement('ul'));
+            reponses.forEach((reponse) => {
+                const li = document.createElement('li');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'reponse';
+                input.value = reponse.innerHTML;
+                input.classList = reponse.classList;
+                li.appendChild(input);
+                li.appendChild(document.createTextNode(reponse.innerHTML));
+                question.querySelector('ul').appendChild(li);
+            });
+
+            return question;
+        }
+
+        // Fonction pour générer une réponse
+        function getReponse(figure, index) {
+            const reponses = [
+                `${data[Math.floor(Math.random()*data.length)].def}`,
+                `${data[Math.floor(Math.random()*data.length)].def}`,
+                `${data[Math.floor(Math.random()*data.length)].def}`,
+                `${data[Math.floor(Math.random()*data.length)].def}`
+            ];
+            return reponses[index];
+        }
+
+        // Remplissage du select avec les figures de style
+        data.forEach((figure) => {
+            const option = document.createElement('option');
+            option.value = figure.name;
+            option.textContent = figure.name;
+            figureSelect.appendChild(option);
+        });
+
+        // Événement pour le bouton Démarrer
+        startButton.addEventListener('click', () => {
+            const selectedFigure = figureSelect.value;
+            const figure = data.find((f) => f.name === selectedFigure);
+            if (figure) {
+                questionContainer.innerHTML = '';
+                questionContainer.appendChild(genererQuestion(figure));
+                startButton.style.display = 'none';
+                submitButton.style.display = 'block';
+            }
+        });
+
+        // Événement pour le bouton Soumettre
+        submitButton.addEventListener('click', () => {
+            const reponses = questionContainer.querySelectorAll('input[name="reponse"]');
+            const reponseCorrecte = questionContainer.querySelector('.correcte').value;
+            let userReponse = '';
+            reponses.forEach((reponse) => {
+                if (reponse.checked) {
+                    userReponse = reponse.value;
+                }
+            });
+            if (userReponse === reponseCorrecte) {
+                alert('Bonne réponse !');
+            } else {
+                alert('Mauvaise réponse. La bonne réponse était : ' + reponseCorrecte);
+            }
+            // currentQuestion++;
+            // if (currentQuestion < data.length) {
+            //     startButton.style.display = 'block';
+            //     submitButton.style.display = 'none';
+            //     figureSelect.value = '';
+            //     figureSelect.disabled = false;
+            // } else {
+            //     alert('Vous avez terminé le quiz !');
+            // }
+
+            questionContainer.innerHTML = '';
+            questionContainer.appendChild(genererQuestion(data[Math.floor(Math.random()*data.length)]));
+            startButton.style.display = 'none';
+            submitButton.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
